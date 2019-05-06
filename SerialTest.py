@@ -47,7 +47,7 @@ class SerialTest:
 
 
         self.countup=self.countup+0.1
-        jevois.sendSerial("Ball"+str(self.countup))
+        jevois.sendSerial("Target 10 10 10")
 
         # Get frames/s info from our timer:
         fps = self.timer.stop()
