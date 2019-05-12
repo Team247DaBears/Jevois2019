@@ -1,6 +1,7 @@
 import libjevois as jevois
 import cv2
 import numpy as np
+import math
 
 ## x
 #
@@ -30,6 +31,10 @@ class Cargo:
         self.frame = 0
 
         self.FocalLengthPixels=658
+        self.imagecount=random.randint(1,50001)
+        self.datafilename="datafile"+str(self.imagecount)+".txt"
+        self.datafile=open(self.datafilename,"w+")
+
         
     # ###################################################################################################
     ## Process function with no USB output
@@ -38,26 +43,7 @@ class Cargo:
         # grayscale image, just use getCvGRAY() instead of getCvBGR(). Also supported are getCvRGB() and getCvRGBA():
         inimg = inframe.getCvBGR()
 
-        # Start measuring image processing time (NOTE: does not account for input conversion time):
-        self.timer.start()
         
-        #jevois.LINFO("Processing video frame {} now...".format(self.frame))
-
-        # TODO: you should implement some processing.
-        # Once you have some results, send serial output messages:
-
-
-        centerX=400
-        angleOfBall=np.arctan(centerX/658.0)
-        angleDegrees=angleOfBall*180.0/3.14
-        #jevois.sendSerial("Ball"+str(angleDegrees))
-        jevois.sendSerial("Ball"+str(angleDegrees))
-
-        # Get frames/s info from our timer:
-        fps = self.timer.stop()
-
-        # Send a serial output message:
-        self.frame += 1
         
     # ###################################################################################################
     ## Process function with USB output
@@ -65,7 +51,11 @@ class Cargo:
          # Get the next camera image (may block until it is captured) and here convert it to OpenCV BGR. If you need a
         # grayscale image, just use getCvGRAY() instead of getCvBGR(). Also supported are getCvRGB() and getCvRGBA():
         inimg = inframe.getCvBGR()
+        if (self.imagecount%20==0):
+            self.datafile.close() #Close it periodically to save contents
+            self.datafile=open(self.datafilename,"a")
 
+        
         #If we know anything about the location of the object, ignore the area we don?t care about
         #crop the image to the only place where balls might be.
 
@@ -75,13 +65,7 @@ class Cargo:
 
         #croppedImage=inimg[294:480,0:639,0:3]
         
-        #jevois.sendSerial("in x "+str(len(inimg)))
-        #jevois.sendSerial("in y "+str(len(inimg[0])))
-        #jevois.sendSerial("in color "+str(len(inimg[0][0])))
-        
-        #jevois.sendSerial("out x "+str(len(croppedImage)))
-        #jevois.sendSerial("out y "+str(len(croppedImage[0])))
-        #jevois.sendSerial("out color "+str(len(croppedImage[0][0])))
+
         
         # Start measuring image processing time (NOTE: does not account for input conversion time):
         self.timer.start()
@@ -115,54 +99,60 @@ class Cargo:
 
            circles = np.uint16(circles)
            
-
+           stupid=False
            for i in circles[0,:]:
         # draw the outer circle
               cv2.circle(mask,(i[0],i[1]),i[2],(0,255,0),2)
-        # draw the center of the circle
+  #      # draw the center of the circle
               cv2.circle(mask,(i[0],i[1]),2,(0,0,255),3)
+              if (stupid==False):
+                 xCenter=i[0]-160  #320x240 resolution, y axis down.
+                 yCenter=i[1]-120
+                 rBall=i[2]  #Radius of ball, in pixels
+                 stupid=True
 
 
-           xCenter=circles[0,0]
-           yCenter=circles[0,1]
-           rBall=circles[0,2]  #Radius of ball, in pixels
+
 
            #Now do the similar triangles thing.  I wish I could draw a diagram here.
 
            leftEdge=xCenter-rBall
            rightEdge=xCenter+rBall
 
-           DPixels=sqrt(xCenter*xCenter+self.FocalLengthPixels*self.FocalLengthPixels)
-           dInches=(13/2)*DPixels/rBall
-           theta=arctan(xCenter/self.FocalLengthPixels)
-           xCoord=dInches*sin(theta)
-           yCoord=dInches*cos(theta)
+           if (leftEdge>0) or (rightEdge<0):
+              DPixels=math.sqrt(xCenter*xCenter+self.FocalLengthPixels*self.FocalLengthPixels)
+              dInches=(13/2)*DPixels/rBall
+              
+           else:
+              dInches=13*self.FocalLengthPixels/(rightEdge-leftEdge)
 
-           jevois.SerialWrite("Ball "+str(xCoord)+" "+str(yCoord)+" "+str(theta)
-                              
-          
-        #angleOfBall=np.arctan(centerX/658.0) #658.0 is the focal length in pixels
-         #  angleDegrees=angleOfBall*180.0/3.1416
-
-           #We may also care about distance
-           #Find the Y center of the axis
-          # centerY=y+54   #Remember we through out the entire top half, plus 54 pixels.
-           #D=hF/Y
-          # distance=24*658/centerY  #24 is h, the number of inches from the camera to the ball                   
-          # BallFound=True
-                              
-         #Tell the robot what we learned.                     
-        #if BallFound:
-         #  jevois.sendSerial("Ball "+str(angleOfBall)+" "+str(distance))
-        #else:
-         #  jevois.sendSerial("No ball found this cycle")
-                              
-
-        
-        
+           theta=np.arctan(xCenter/self.FocalLengthPixels)
+           xCoord=dInches*np.sin(theta)
+           yCoord=dInches*np.cos(theta)
+              
+           self.datafile.write(str(self.imagecount)+" found a ball\n");
+	   self.datafile.write(str(xCenter)
+	   self.datafile.write(" ")
+	   self.datafile.write(str(yCenter)
+	   self.datafile.write(" ")
+	   self.datafile.write(str(rBall))
+	   self.datafile.write(" ")
+	   self.datafile.write(str(DPixels))
+	   self.datafile.write(" ")
+	   self.datafile.write(str(dInches))
+           self.datafile.write(" ")
+	   self.datafile.write(str(theta))
+	   self.datafile.write(" ")
+	   self.datafile.write(str(xCoord))
+	   self.datafile.write(" ")
+	   self.datafile.write(str(yCoord))
+           jevois.sendSerial("Ball "+str(xCoord)+" "+str(yCoord)+" "+str(theta))
+                               
+        else:
+           self.datafile.write(str(self.imagecount)+" no ball\n");
          
          #hard code data from config files, for now
-         
+        self.imagecount+=1
         outimg = mask
         outframe.sendCv(outimg)
         
