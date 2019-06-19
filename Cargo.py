@@ -2,6 +2,7 @@ import libjevois as jevois
 import cv2
 import numpy as np
 import math
+import random
 
 ## x
 #
@@ -30,7 +31,7 @@ class Cargo:
         # a simple frame counter used to demonstrate sendSerial():
         self.frame = 0
 
-        self.FocalLengthPixels=658
+        self.FocalLengthPixels=335
         self.imagecount=random.randint(1,50001)
         self.datafilename="datafile"+str(self.imagecount)+".txt"
         self.datafile=open(self.datafilename,"w+")
@@ -54,6 +55,8 @@ class Cargo:
         if (self.imagecount%20==0):
             self.datafile.close() #Close it periodically to save contents
             self.datafile=open(self.datafilename,"a")
+        imagefilename="saveimage"+str(self.imagecount)+".png"
+        cv2.imwrite(imagefilename, inimg)  
 
         
         #If we know anything about the location of the object, ignore the area we don?t care about
@@ -124,6 +127,7 @@ class Cargo:
               dInches=(13/2)*DPixels/rBall
               
            else:
+              DPixels=-1  #not meaningful
               dInches=13*self.FocalLengthPixels/(rightEdge-leftEdge)
 
            theta=np.arctan(xCenter/self.FocalLengthPixels)
@@ -131,21 +135,21 @@ class Cargo:
            yCoord=dInches*np.cos(theta)
               
            self.datafile.write(str(self.imagecount)+" found a ball\n");
-	   self.datafile.write(str(xCenter)
-	   self.datafile.write(" ")
-	   self.datafile.write(str(yCenter)
-	   self.datafile.write(" ")
-	   self.datafile.write(str(rBall))
-	   self.datafile.write(" ")
-	   self.datafile.write(str(DPixels))
-	   self.datafile.write(" ")
-	   self.datafile.write(str(dInches))
+           self.datafile.write(str(xCenter))
            self.datafile.write(" ")
-	   self.datafile.write(str(theta))
-	   self.datafile.write(" ")
-	   self.datafile.write(str(xCoord))
-	   self.datafile.write(" ")
-	   self.datafile.write(str(yCoord))
+           self.datafile.write(str(yCenter))
+           self.datafile.write(" ")
+           self.datafile.write(str(rBall))
+           self.datafile.write(" ")
+           self.datafile.write(str(DPixels))
+           self.datafile.write(" ")
+           self.datafile.write(str(dInches))
+           self.datafile.write(" ")
+           self.datafile.write(str(theta))
+           self.datafile.write(" ")
+           self.datafile.write(str(xCoord))
+           self.datafile.write(" ")
+           self.datafile.write(str(yCoord))
            jevois.sendSerial("Ball "+str(xCoord)+" "+str(yCoord)+" "+str(theta))
                                
         else:

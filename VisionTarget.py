@@ -7,6 +7,7 @@
 import libjevois as jevois
 import cv2
 import numpy as np
+import random
 
 ## Detect Vision Targets
 #
@@ -59,6 +60,10 @@ class VisionTarget:
         self.distcoeff[0][2]=0
         self.distcoeff[0][3]=0
         self.distcoeff[0][4]=0
+        
+        self.currentimagecount=random.randint(1,50001)
+        self.datafile=open("targetData.txt","w+")
+        self.written=False
 
         
         
@@ -78,18 +83,25 @@ class VisionTarget:
     def process(self, inframe, outframe):
         # Get the next camera image (may block until it is captured) and here convert it to OpenCV BGR. If you need a
         # grayscale image, just use getCvGRAY() instead of getCvBGR(). Also supported are getCvRGB() and getCvRGBA():
-        self.currentloopcount=self.currentloopcount+1
-        if self.currentloopcount==self.maxloopcount:
-           self.currentimagecount=self.currentimagecount+1
-           self.currentloopcount=0
-           if self.currentimagecount>self.maximagecount:
-              self.currentimagecount=self.minimagecount
-        self.currentimagecount=242
-        imagefilename="practice"+str(self.currentimagecount)+".png"
-        inimg = cv2.imread(imagefilename)
+       # self.currentloopcount=self.currentloopcount+1
+       # if self.currentloopcount==self.maxloopcount:
+       #    self.currentimagecount=self.currentimagecount+1
+       #    self.currentloopcount=0
+       #    if self.currentimagecount>self.maximagecount:
+       #       self.currentimagecount=self.minimagecount
+       # self.currentimagecount=242
         
-        #inimg=cv2.transpose(inimg)
-        #inimg=cv2.flip(inimg, 1)
+        imagefilename="practice"+str(self.currentimagecount)+".png"
+        
+#        inimg = cv2.imread(imagefilename+)
+        inimg=cv2.imread("practice45719.png")      
+        
+#
+#        inimg=inframe.getCvBGR()
+        self.currentimagecount+=1
+#        cv2.imwrite(imagefilename,inimg)
+        inimg=cv2.transpose(inimg)
+        inimg=cv2.flip(inimg, 1)
         
 
         # Start measuring image processing time (NOTE: does not account for input conversion time):
@@ -137,6 +149,9 @@ class VisionTarget:
            cv2.drawContours(backtorgb,[brectPoints],0,(0,0,255),1)
            boxText="("+str(brectPoints[0][0])+","+str(brectPoints[0][1])+")"+"("+str(brectPoints[1][0])+","+str(brectPoints[1][1])+")""("+str(brectPoints[2][0])+","+str(brectPoints[2][1])+")""("+str(brectPoints[3][0])+","+str(brectPoints[3][1])+")"
            #cv2.putText(backtorgb, boxText,(3, 233), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+           if self.written==False:
+              self.datafile.write(boxText)
+              self.datafile.write("\n")
         if secondIndex>-1:
            cv2.drawContours(backtorgb, contours, secondIndex, (0,255,0), 1)
            brect2=cv2.minAreaRect(contours[secondIndex])
@@ -146,6 +161,10 @@ class VisionTarget:
            boxText="("+str(brectPoints2[0][0])+","+str(brectPoints2[0][1])+")"+"("+str(brectPoints2[1][0])+","+str(brectPoints2[1][1])+")""("+str(brectPoints2[2][0])+","+str(brectPoints2[2][1])+")""("+str(brectPoints2[3][0])+","+str(brectPoints2[3][1])+")"
            cv2.putText(backtorgb, boxText,(3, 233), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
            cv2.drawContours(backtorgb,[brectPoints2],0,(0,0,255),1)
+           if self.written==False:
+              self.datafile.write(boxText)
+              self.datafile.write("\n")
+            
 
            #if you are here, there must be two contours.  Find the appropriate
            #corners
@@ -155,15 +174,19 @@ class VisionTarget:
            toppointindex=-1
            secondpointindex=-1
            
-           for index in range(0,3):
-              if brectPoints[index][0]<topmost:
+           for index in range(0,4):
+              if brectPoints[index][1]<topmost:
                 secondpointindex=toppointindex
                 toppointindex=index
                 secondmost=topmost
-                topmost=brectPoints[index][0]
-              elif brectPoints[index][0]<secondmost:
+                topmost=brectPoints[index][1]
+                if self.written==False:
+                    self.datafile.write("Topmost index is now "+str(index)+"\n")
+              elif brectPoints[index][1]<secondmost:
                 secondpointindex=index
-                secondmost=brectPoints[index][0]
+                secondmost=brectPoints[index][1]
+                if self.written==False:
+                    self.datafile.write("Secondmost index is now "+str(index)+"\n")
                 
            topcorner1=brectPoints[toppointindex]
            secondcorner1=brectPoints[secondpointindex]
@@ -172,16 +195,24 @@ class VisionTarget:
            secondmost=321
            toppointindex=-1
            secondpointindex=-1
-           
-           for index in range(0,3):
-              if brectPoints2[index][0]<topmost:
+           if self.written==False:
+              self.datafile.write("Next set of points \n")
+           for index in range(0,4):
+              if self.written==False:
+                 self.datafile.write(str(topmost)+" "+str(secondmost)+" "+str(brectPoints2[index][1])+"\n")
+              if brectPoints2[index][1]<topmost:
                 secondpointindex=toppointindex
                 toppointindex=index
                 secondmost=topmost
-                topmost=brectPoints2[index][0]
-              elif brectPoints2[index][0]<secondmost:
+                topmost=brectPoints2[index][1]
+                if self.written==False:
+                    self.datafile.write("Topmost index is now "+str(index)+"\n")
+
+              elif brectPoints2[index][1]<secondmost:
                 secondpointindex=index
-                secondmost=brectPoints2[index][0]
+                secondmost=brectPoints2[index][1]
+                if self.written==False:
+                    self.datafile.write("Secondmost index is now "+str(index)+"\n")
                 
            topcorner2=brectPoints2[toppointindex]
            secondcorner2=brectPoints2[secondpointindex]
@@ -189,9 +220,9 @@ class VisionTarget:
            #cv2.putText(backtorgb, str(topcorner2[0])+" "+str(topcorner2[1]),(3, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
       
            objpoints=np.array(((-5.94,0.5,0),(-4,0,0),(4,0,0),(5.94,0.5,0)),dtype=np.float)
-           y1=topcorner1[1]
-           y2=topcorner2[1]
-           if y1>y2:
+           x1=topcorner1[0]
+           x2=topcorner2[0]
+           if x1<x2:
                imagepoints=np.array([[topcorner1[0],topcorner1[1]],[secondcorner1[0],secondcorner1[1]],[secondcorner2[0],secondcorner2[1]],[topcorner2[0],topcorner2[1]]],dtype=np.float)
                
            else:
@@ -215,13 +246,34 @@ class VisionTarget:
            #cv2.putText(backtorgb, str(tvec[0])+" "+str(tvec[1])+" "+str(tvec[2]),(3, 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
            cv2.putText(backtorgb, "%.2f" % tvec[0]+" "+"%.2f" % tvec[1]+" "+"%.2f" % tvec[2],(3, 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
            
-           cv2.putText(backtorgb, "%.2f" % rvec[0]+" "+  "%.2f" % rvec[1]+" "+"%.2f" % rvec[2],(3, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+           cv2.putText(backtorgb, "%.2f" % (rvec[0]*180/3.14159)+" "+  "%.2f" % (rvec[1]*180/3.14159)+" "+"%.2f" % (rvec[2]*180/3.14159),(3, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
           
            #spit things out on the serial port, but first, do some testing.  Print stuff out.                   
                     
 
-              
-                   
+           #change coordinate systems
+
+           ZYX,jac=cv2.Rodrigues(rvec)
+#Now we have a 3x3 rotation matrix, and a translation vector. Form the 4x4 transformation matrix using homogeneous coordinates.
+#There are probably numpy functions for array/matrix manipulations that would make this easier, but I don?t know them and this works.
+           totaltransformmatrix=np.array([[ZYX[0,0],ZYX[0,1],ZYX[0,2],tvec[0]],[ZYX[1,0],ZYX[1,1],ZYX[1,2],tvec[1]],[ZYX[2,0],ZYX[2,1],ZYX[2,2],tvec[2]],[0,0,0,1]])
+#The resulting array is the transformation matrix from world coordinates (centered on the target) to camera coordinates. (Centered on the camera) We need camera to world. That is just the inverse of that matrix.
+           WtoC=np.mat(totaltransformmatrix)
+
+           inverserotmax=np.linalg.inv(totaltransformmatrix)
+           cv2.putText(backtorgb, "%.2f" % WtoC[0,3]+" "+"%.2f" % WtoC[1,3]+" "+"%.2f" % WtoC[2,3],(3, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+        
+           datafile.write("Rotation matrix\n")
+           for i in range(0,4):
+               for j in range(0,5):
+                   datafile.write(str(totaltransformmatrix[i,j])+"   ")
+               datafile.write("\n")
+           
+           datafile.write("Inverse Rotation Matrix")
+           for i in range(0,4):
+               for j in range(0,5):
+                   datafile.write(str(inverserotmax[i,j])+"   ")
+               datafile.write("\n")
 
         
  
@@ -232,4 +284,5 @@ class VisionTarget:
         
         # Convert our output image to video output format and send to host over USB:
         outframe.sendCv(backtorgb)
+        self.written=True
         
