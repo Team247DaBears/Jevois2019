@@ -43,9 +43,9 @@ class VisionTarget:
 
         self.cameraMatrix=np.zeros((3,3))
         self.cameraMatrix[0][0]=329.0
-        self.cameraMatrix[0][2]=160
+        self.cameraMatrix[0][2]=120
         self.cameraMatrix[1][1]=329
-        self.cameraMatrix[1][2]=120
+        self.cameraMatrix[1][2]=160
         self.cameraMatrix[2][2]=1
         
         self.distcoeff=np.zeros((1,5))
@@ -93,13 +93,13 @@ class VisionTarget:
         
         imagefilename="practice"+str(self.currentimagecount)+".png"
         
-#        inimg = cv2.imread(imagefilename+)
-        inimg=cv2.imread("practice45719.png")      
+  #      inimg = cv2.imread(imagefilename+)
+ #       inimg=cv2.imread("practice45719.png")      
         
 #
-#        inimg=inframe.getCvBGR()
+        inimg=inframe.getCvBGR()
         self.currentimagecount+=1
-#        cv2.imwrite(imagefilename,inimg)
+        cv2.imwrite(imagefilename,inimg)
         inimg=cv2.transpose(inimg)
         inimg=cv2.flip(inimg, 1)
         
@@ -261,19 +261,9 @@ class VisionTarget:
            WtoC=np.mat(totaltransformmatrix)
 
            inverserotmax=np.linalg.inv(totaltransformmatrix)
-           cv2.putText(backtorgb, "%.2f" % WtoC[0,3]+" "+"%.2f" % WtoC[1,3]+" "+"%.2f" % WtoC[2,3],(3, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+           cv2.putText(backtorgb, "%.2f" % inverserotmax[0,3]+" "+"%.2f" % inverserotmax[1,3]+" "+"%.2f" % inverserotmax[2,3],(3, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
         
-           datafile.write("Rotation matrix\n")
-           for i in range(0,4):
-               for j in range(0,5):
-                   datafile.write(str(totaltransformmatrix[i,j])+"   ")
-               datafile.write("\n")
-           
-           datafile.write("Inverse Rotation Matrix")
-           for i in range(0,4):
-               for j in range(0,5):
-                   datafile.write(str(inverserotmax[i,j])+"   ")
-               datafile.write("\n")
+                   
 
         
  
