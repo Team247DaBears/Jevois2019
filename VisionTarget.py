@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import libjevois as jevois
 import cv2
 import numpy as np
@@ -54,13 +48,7 @@ class VisionTarget:
         self.distcoeff[0][2]=-0.00115
         self.distcoeff[0][3]=-0.00087
         self.distcoeff[0][4]=-2.4
-        
-        self.distcoeff[0][0]=0
-        self.distcoeff[0][1]=0
-        self.distcoeff[0][2]=0
-        self.distcoeff[0][3]=0
-        self.distcoeff[0][4]=0
-        
+                
         self.currentimagecount=random.randint(1,50001)
         self.datafile=open("targetData.txt","w+")
         self.written=False
@@ -93,15 +81,15 @@ class VisionTarget:
         
         imagefilename="practice"+str(self.currentimagecount)+".png"
         
-  #      inimg = cv2.imread(imagefilename+)
- #       inimg=cv2.imread("practice45719.png")      
+      #  inimg = cv2.imread(imagefilename+)
+      #  inimg=cv2.imread("practice30325.png")      
         
-#
         inimg=inframe.getCvBGR()
         self.currentimagecount+=1
         cv2.imwrite(imagefilename,inimg)
         inimg=cv2.transpose(inimg)
         inimg=cv2.flip(inimg, 1)
+
         
 
         # Start measuring image processing time (NOTE: does not account for input conversion time):
@@ -169,66 +157,124 @@ class VisionTarget:
            #if you are here, there must be two contours.  Find the appropriate
            #corners
 
-           topmost=321 #there ought to be an easier way, but......
-           secondmost=321
-           toppointindex=-1
-           secondpointindex=-1
+
+           v1=321 #there ought to be an easier way, but......
+           v2=321
+           v3=321
+           v4=321
+           
+           v1i=-1
+           v2i=-1
+           v3i=-1
+           v4i=-1
+
+           #This is possibly the dumbest sort I've ever done.  But it works and I was tired.
+           #It is really a modification of some earlier code, that made sense.
            
            for index in range(0,4):
-              if brectPoints[index][1]<topmost:
-                secondpointindex=toppointindex
-                toppointindex=index
-                secondmost=topmost
-                topmost=brectPoints[index][1]
-                if self.written==False:
-                    self.datafile.write("Topmost index is now "+str(index)+"\n")
-              elif brectPoints[index][1]<secondmost:
-                secondpointindex=index
-                secondmost=brectPoints[index][1]
-                if self.written==False:
-                    self.datafile.write("Secondmost index is now "+str(index)+"\n")
-                
-           topcorner1=brectPoints[toppointindex]
-           secondcorner1=brectPoints[secondpointindex]
+              if brectPoints[index][1]<v1:
+                v4i=v3i
+                v3i=v2i
+                v2i=v1i
+                v1i=index
 
-           topmost=321 #there ought to be an easier way, but......
-           secondmost=321
-           toppointindex=-1
-           secondpointindex=-1
-           if self.written==False:
-              self.datafile.write("Next set of points \n")
+                v4=v3
+                v3=v2
+                v2=v1
+                v1=brectPoints[index][1]
+              elif brectPoints[index][1]<v2:
+                v4i=v3i
+                v3i=v2i
+                v2i=index
+
+                v4=v3
+                v3=v2
+                v2=brectPoints[index][1]
+              elif brectPoints[index][1]<v3:
+                v4i=v3i
+                v3i=index
+
+                v4=v3
+                v3=brectPoints[index][1]
+              else:
+                v4i=index
+                v4=brectPoints[index][1]
+                
+            
+           point1_1=brectPoints[v1i]
+           point2_1=brectPoints[v2i]
+           point3_1=brectPoints[v3i]
+           point4_1=brectPoints[v4i]
+
+
+           v1=321 #there ought to be an easier way, but......
+           v2=321
+           v3=321
+           v4=321
+           
+           v1i=-1
+           v2i=-1
+           v3i=-1
+           v4i=-1
+
            for index in range(0,4):
-              if self.written==False:
-                 self.datafile.write(str(topmost)+" "+str(secondmost)+" "+str(brectPoints2[index][1])+"\n")
-              if brectPoints2[index][1]<topmost:
-                secondpointindex=toppointindex
-                toppointindex=index
-                secondmost=topmost
-                topmost=brectPoints2[index][1]
-                if self.written==False:
-                    self.datafile.write("Topmost index is now "+str(index)+"\n")
+              if brectPoints2[index][1]<v1:
+                v4i=v3i
+                v3i=v2i
+                v2i=v1i
+                v1i=index
 
-              elif brectPoints2[index][1]<secondmost:
-                secondpointindex=index
-                secondmost=brectPoints2[index][1]
-                if self.written==False:
-                    self.datafile.write("Secondmost index is now "+str(index)+"\n")
+                v4=v3
+                v3=v2
+                v2=v1
+                v1=brectPoints2[index][1]
+              elif brectPoints2[index][1]<v2:
+                v4i=v3i
+                v3i=v2i
+                v2i=index
+
+                v4=v3
+                v3=v2
+                v2=brectPoints2[index][1]
+              elif brectPoints2[index][1]<v3:
+                v4i=v3i
+                v3i=index
+
+                v4=v3
+                v3=brectPoints2[index][1]
+              else:
+                v4i=index
+                v4=brectPoints2[index][1]
                 
-           topcorner2=brectPoints2[toppointindex]
-           secondcorner2=brectPoints2[secondpointindex]
+            
+           point1_2=brectPoints2[v1i]
+           point2_2=brectPoints2[v2i]
+           point3_2=brectPoints2[v3i]
+           point4_2=brectPoints2[v4i]
+
+           
            #Almost there - set up the arrays of object and image points
            #cv2.putText(backtorgb, str(topcorner2[0])+" "+str(topcorner2[1]),(3, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
       
-           objpoints=np.array(((-5.94,0.5,0),(-4,0,0),(4,0,0),(5.94,0.5,0)),dtype=np.float)
-           x1=topcorner1[0]
-           x2=topcorner2[0]
-           if x1<x2:
-               imagepoints=np.array([[topcorner1[0],topcorner1[1]],[secondcorner1[0],secondcorner1[1]],[secondcorner2[0],secondcorner2[1]],[topcorner2[0],topcorner2[1]]],dtype=np.float)
-               
+#           objpoints=np.array(((-5.94,0.5,0),(-4,0,0),(4,0,0),(5.94,0.5,0)),dtype=np.float)3
+           x1=point1_1[0]
+           x2=point1_2[0]
+           imagepoints=np.array((point1_1,point2_1,point3_1,point4_1,point1_2,point2_2,point3_2,point4_2),dtype=np.float)
+           
+
+           if (x1<x2) :
+                objpoints=np.array(((-5.94,0.5,0),(-4,0,0),(-7.19,-4.34,0),(-5.25,-4.84,0),(5.94,0.5,0),(4,0,0),(7.19,-4.34,0),(5.25,4.84,0)),dtype=np.float)
            else:
-               imagepoints=np.array([[topcorner2[0],topcorner2[1]],[secondcorner2[0],secondcorner2[1]],[secondcorner1[0],secondcorner1[1]],[topcorner1[0],topcorner1[1]]],dtype=np.float)
+		objpoints=np.array(((5.94,0.5,0),(4,0,0),(7.19,-4.34,0),(5.25,4.84,0),(-5.94,0.5,0),(-4,0,0),(-7.19,-4.34,0),(-5.25,-4.84,0)),dtype=np.float)
          #  imagepoints=np.array(((50*(-5.94)+320,50*0.5+240),(50*(-4)+320,0+240),(50*4+320,0+240),(50*5.94+320,50*0.5+240)),dtype=np.float)
-              
+         #  imagepoints=np.array(((104,194),(124,197),(195,194),(214,188)),dtype=np.float)   
+           if self.written==False:
+              self.datafile.write("Image Points\n")
+              self.datafile.write(str(imagepoints[0][0])+" "+str(imagepoints[0][1])+"\n")
+              self.datafile.write(str(imagepoints[1][0])+" "+str(imagepoints[1][1])+"\n")
+              self.datafile.write(str(imagepoints[2][0])+" "+str(imagepoints[2][1])+"\n")
+              self.datafile.write(str(imagepoints[3][0])+" "+str(imagepoints[3][1])+"\n")
+           
 
            #imagepoints=np.array(((186,220),(188,212),(187,171),(186,164)),dtype=np.float)
            cv2.putText(backtorgb, str(imagepoints[0][0])+" "+str(imagepoints[0][1]),(3, 65), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
@@ -263,7 +309,8 @@ class VisionTarget:
            inverserotmax=np.linalg.inv(totaltransformmatrix)
            cv2.putText(backtorgb, "%.2f" % inverserotmax[0,3]+" "+"%.2f" % inverserotmax[1,3]+" "+"%.2f" % inverserotmax[2,3],(3, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
         
-                   
+           processedFileName="output"+str(self.currentimagecount-1)+".png"
+           cv2.imwrite(processedFileName,backtorgb)        
 
         
  
