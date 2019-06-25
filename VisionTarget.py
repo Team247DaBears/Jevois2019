@@ -261,13 +261,23 @@ class VisionTarget:
            x2=point1_2[0]
            imagepoints=np.array((point1_1,point2_1,point3_1,point4_1,point1_2,point2_2,point3_2,point4_2),dtype=np.float)
            
+           logstring(str(imagepoints))
+           
 
            if (x1<x2) :
                 objpoints=np.array(((-5.94,0.5,0),(-4,0,0),(-7.19,-4.34,0),(-5.25,-4.84,0),(5.94,0.5,0),(4,0,0),(7.19,-4.34,0),(5.25,4.84,0)),dtype=np.float)
            else:
-		objpoints=np.array(((5.94,0.5,0),(4,0,0),(7.19,-4.34,0),(5.25,4.84,0),(-5.94,0.5,0),(-4,0,0),(-7.19,-4.34,0),(-5.25,-4.84,0)),dtype=np.float)
+                objpoints=np.array(((5.94,0.5,0),(4,0,0),(7.19,-4.34,0),(5.25,4.84,0),(-5.94,0.5,0),(-4,0,0),(-7.19,-4.34,0),(-5.25,-4.84,0)),dtype=np.float)
          #  imagepoints=np.array(((50*(-5.94)+320,50*0.5+240),(50*(-4)+320,0+240),(50*4+320,0+240),(50*5.94+320,50*0.5+240)),dtype=np.float)
          #  imagepoints=np.array(((104,194),(124,197),(195,194),(214,188)),dtype=np.float)   
+         logstring(str(imagepoints))
+         logsttring("\n")
+         logstring(str(objpoints))
+         logstring("\n")
+         logstring("\n")
+         logstring("\n")
+         
+         
            if self.written==False:
               self.datafile.write("Image Points\n")
               self.datafile.write(str(imagepoints[0][0])+" "+str(imagepoints[0][1])+"\n")
@@ -282,10 +292,10 @@ class VisionTarget:
            cv2.putText(backtorgb, str(imagepoints[2][0])+" "+str(imagepoints[2][1]),(3, 105), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
            cv2.putText(backtorgb, str(imagepoints[3][0])+" "+str(imagepoints[3][1]),(3, 125), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
       
-           cv2.putText(backtorgb, str(topcorner1[0])+" "+str(topcorner1[1]),(160,65),  cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
-           cv2.putText(backtorgb, str(secondcorner1[0])+" "+str(secondcorner1[1]),(160,85),  cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
-           cv2.putText(backtorgb, str(topcorner2[0])+" "+str(topcorner2[1]),(160,105),  cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
-           cv2.putText(backtorgb, str(secondcorner2[0])+" "+str(secondcorner2[1]),(160,125),  cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+      #     cv2.putText(backtorgb, str(topcorner1[0])+" "+str(topcorner1[1]),(160,65),  cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+      #     cv2.putText(backtorgb, str(secondcorner1[0])+" "+str(secondcorner1[1]),(160,85),  cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+      #     cv2.putText(backtorgb, str(topcorner2[0])+" "+str(topcorner2[1]),(160,105),  cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+      #     cv2.putText(backtorgb, str(secondcorner2[0])+" "+str(secondcorner2[1]),(160,125),  cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
            #The moment of truth?
            errorestimate,rvec,tvec=cv2.solvePnP(objpoints,imagepoints,self.cameraMatrix,self.distcoeff)
 
@@ -322,4 +332,18 @@ class VisionTarget:
         # Convert our output image to video output format and send to host over USB:
         outframe.sendCv(backtorgb)
         self.written=True
+        
+    def logstring(self, lstring):
+        self.datafile.write(lstring)
+        
+    def logstringonce(self,lstring):
+        if (self.written==False):
+            self.datafile.write(lstring)
+            
+    def writeToScreen(self, screenString, selectedImage,startX, startY):
+         cv2.putText(selectedImage,screenString,)(startX,startY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+          
+        
+    
+        
         
