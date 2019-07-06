@@ -53,7 +53,12 @@ class VisionTarget:
         self.datafile=open("targetData.txt","w+")
         self.written=False
 
+    def logstring(self, lstring):
+        self.datafile.write(lstring)
         
+    def logstringonce(self,lstring):
+        if (self.written==False):
+            self.datafile.write(lstring)    
         
         
 
@@ -69,20 +74,12 @@ class VisionTarget:
     # ###################################################################################################
     ## Process function with USB output
     def process(self, inframe, outframe):
-        # Get the next camera image (may block until it is captured) and here convert it to OpenCV BGR. If you need a
-        # grayscale image, just use getCvGRAY() instead of getCvBGR(). Also supported are getCvRGB() and getCvRGBA():
-       # self.currentloopcount=self.currentloopcount+1
-       # if self.currentloopcount==self.maxloopcount:
-       #    self.currentimagecount=self.currentimagecount+1
-       #    self.currentloopcount=0
-       #    if self.currentimagecount>self.maximagecount:
-       #       self.currentimagecount=self.minimagecount
-       # self.currentimagecount=242
+
         
         imagefilename="practice"+str(self.currentimagecount)+".png"
         
       #  inimg = cv2.imread(imagefilename+)
-      #  inimg=cv2.imread("practice30325.png")      
+      #  inimg=cv2.imread("practice7354.png")      
         
         inimg=inframe.getCvBGR()
         self.currentimagecount+=1
@@ -92,9 +89,7 @@ class VisionTarget:
 
         
 
-        # Start measuring image processing time (NOTE: does not account for input conversion time):
-        self.timer.start()
-
+        
         lowColor=np.array([53,20,211])
         highColor=np.array([86,255,255])
         imghls = cv2.cvtColor(inimg, cv2.COLOR_BGR2HLS)
@@ -121,7 +116,6 @@ class VisionTarget:
                   secondIndex=biggestIndex
                   biggestSize=cv2.contourArea(c)
                   biggestIndex=index
-          #        cv2.putText(backtorgb, str(cv2.contourArea(c)),(3, 233), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
                elif  cv2.contourArea(c)>secondSize:
                   secondSize=cv2.contourArea(c)
                   secondIndex=index
@@ -254,43 +248,27 @@ class VisionTarget:
 
            
            #Almost there - set up the arrays of object and image points
-           #cv2.putText(backtorgb, str(topcorner2[0])+" "+str(topcorner2[1]),(3, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
-      
-#           objpoints=np.array(((-5.94,0.5,0),(-4,0,0),(4,0,0),(5.94,0.5,0)),dtype=np.float)3
+        
            x1=point1_1[0]
            x2=point1_2[0]
            imagepoints=np.array((point1_1,point2_1,point3_1,point4_1,point1_2,point2_2,point3_2,point4_2),dtype=np.float)
            
-           logstring(str(imagepoints))
+    #       logstring(str(imagepoints))
            
 
            if (x1<x2) :
-                objpoints=np.array(((-5.94,0.5,0),(-4,0,0),(-7.19,-4.34,0),(-5.25,-4.84,0),(5.94,0.5,0),(4,0,0),(7.19,-4.34,0),(5.25,4.84,0)),dtype=np.float)
+                objpoints=np.array(((-5.94,0.5,0),(-4,0,0),(-7.32,-4.82,0),(-5.38,-5.32,0),(5.94,0.5,0),(4,0,0),(7.32,-4.82,0),(5.38,-5.32,0)),dtype=np.float)
            else:
-                objpoints=np.array(((5.94,0.5,0),(4,0,0),(7.19,-4.34,0),(5.25,4.84,0),(-5.94,0.5,0),(-4,0,0),(-7.19,-4.34,0),(-5.25,-4.84,0)),dtype=np.float)
-         #  imagepoints=np.array(((50*(-5.94)+320,50*0.5+240),(50*(-4)+320,0+240),(50*4+320,0+240),(50*5.94+320,50*0.5+240)),dtype=np.float)
-         #  imagepoints=np.array(((104,194),(124,197),(195,194),(214,188)),dtype=np.float)   
-         logstring(str(imagepoints))
-         logsttring("\n")
-         logstring(str(objpoints))
-         logstring("\n")
-         logstring("\n")
-         logstring("\n")
+                objpoints=np.array(((5.94,0.5,0),(4,0,0),(7.32,-4.82,0),(5.38,-5.32,0),(-5.94,0.5,0),(-4,0,0),(-7.32,-4.82,0),(-5.38,-5.32,0)),dtype=np.float)
+
          
-         
-           if self.written==False:
-              self.datafile.write("Image Points\n")
-              self.datafile.write(str(imagepoints[0][0])+" "+str(imagepoints[0][1])+"\n")
-              self.datafile.write(str(imagepoints[1][0])+" "+str(imagepoints[1][1])+"\n")
-              self.datafile.write(str(imagepoints[2][0])+" "+str(imagepoints[2][1])+"\n")
-              self.datafile.write(str(imagepoints[3][0])+" "+str(imagepoints[3][1])+"\n")
            
 
            #imagepoints=np.array(((186,220),(188,212),(187,171),(186,164)),dtype=np.float)
-           cv2.putText(backtorgb, str(imagepoints[0][0])+" "+str(imagepoints[0][1]),(3, 65), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
-           cv2.putText(backtorgb, str(imagepoints[1][0])+" "+str(imagepoints[1][1]),(3, 85), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
-           cv2.putText(backtorgb, str(imagepoints[2][0])+" "+str(imagepoints[2][1]),(3, 105), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
-           cv2.putText(backtorgb, str(imagepoints[3][0])+" "+str(imagepoints[3][1]),(3, 125), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+           cv2.putText(backtorgb, str(imagepoints[4][0])+" "+str(imagepoints[4][1]),(3, 65), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+           cv2.putText(backtorgb, str(imagepoints[5][0])+" "+str(imagepoints[5][1]),(3, 85), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+           cv2.putText(backtorgb, str(imagepoints[6][0])+" "+str(imagepoints[6][1]),(3, 105), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+           cv2.putText(backtorgb, str(imagepoints[7][0])+" "+str(imagepoints[7][1]),(3, 125), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
       
       #     cv2.putText(backtorgb, str(topcorner1[0])+" "+str(topcorner1[1]),(160,65),  cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
       #     cv2.putText(backtorgb, str(secondcorner1[0])+" "+str(secondcorner1[1]),(160,85),  cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
@@ -305,23 +283,46 @@ class VisionTarget:
            cv2.putText(backtorgb, "%.2f" % (rvec[0]*180/3.14159)+" "+  "%.2f" % (rvec[1]*180/3.14159)+" "+"%.2f" % (rvec[2]*180/3.14159),(3, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
           
            #spit things out on the serial port, but first, do some testing.  Print stuff out.                   
-                    
+
+
 
            #change coordinate systems
 
            ZYX,jac=cv2.Rodrigues(rvec)
+
+           #ZYX is the transformation matrix from the camera to world coordinates.  Use it to find yaw
+
+           sy=np.sqrt(ZYX[0][0]*ZYX[0][0]+ZYX[1][0]*ZYX[1][0])
+           
+           yaw=np.atan2(ZYZ[2][0],sy)
+           roll=0
+           if (sy<0.000001):
+               roll=np.atan2(ZYX[1][2],ZYX[1][1])
+           else:
+               roll=np.atan2(ZYX[2][1],ZYX[2][2])
+           
+           #if axes were flipped, invert the y axis
+           if (roll<-np.pi/2 OR roll>np.pi/2):
+               yaw=-1*yaw
+
+
+           serialstring="Target "+ str(tvec[0])+" "+str(tvec[2])+" "+str(yaw)+"\n"
+           jevois.sendSerial(serialstring)
+
+
 #Now we have a 3x3 rotation matrix, and a translation vector. Form the 4x4 transformation matrix using homogeneous coordinates.
 #There are probably numpy functions for array/matrix manipulations that would make this easier, but I don?t know them and this works.
-           totaltransformmatrix=np.array([[ZYX[0,0],ZYX[0,1],ZYX[0,2],tvec[0]],[ZYX[1,0],ZYX[1,1],ZYX[1,2],tvec[1]],[ZYX[2,0],ZYX[2,1],ZYX[2,2],tvec[2]],[0,0,0,1]])
+   #        totaltransformmatrix=np.array([[ZYX[0,0],ZYX[0,1],ZYX[0,2],tvec[0]],[ZYX[1,0],ZYX[1,1],ZYX[1,2],tvec[1]],[ZYX[2,0],ZYX[2,1],ZYX[2,2],tvec[2]],[0,0,0,1]])
 #The resulting array is the transformation matrix from world coordinates (centered on the target) to camera coordinates. (Centered on the camera) We need camera to world. That is just the inverse of that matrix.
-           WtoC=np.mat(totaltransformmatrix)
+   #        WtoC=np.mat(totaltransformmatrix)
 
-           inverserotmax=np.linalg.inv(totaltransformmatrix)
-           cv2.putText(backtorgb, "%.2f" % inverserotmax[0,3]+" "+"%.2f" % inverserotmax[1,3]+" "+"%.2f" % inverserotmax[2,3],(3, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+          # inverserotmax=np.linalg.inv(totaltransformmatrix)
+          # cv2.putText(backtorgb, "%.2f" % inverserotmax[0,3]+" "+"%.2f" % inverserotmax[1,3]+" "+"%.2f" % inverserotmax[2,3],(3, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+   #        cv2.putText(backtorgb, "%.2f" % Yaw,(3, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
         
-           processedFileName="output"+str(self.currentimagecount-1)+".png"
-           cv2.imwrite(processedFileName,backtorgb)        
-
+    #       processedFileName="output"+str(self.currentimagecount-1)+".png"
+    #       cv2.imwrite(processedFileName,backtorgb)        
+    #       cv2.imwrite("output7354.png",backtorgb)
         
  
  
@@ -330,18 +331,17 @@ class VisionTarget:
        # cv2.putText(outimg, fps, (3, height - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
         
         # Convert our output image to video output format and send to host over USB:
+        else:  #going way back to if secondindex<-1
+           jevois.sendSerial("Targets not found\n")
         outframe.sendCv(backtorgb)
         self.written=True
+
         
-    def logstring(self, lstring):
-        self.datafile.write(lstring)
         
-    def logstringonce(self,lstring):
-        if (self.written==False):
-            self.datafile.write(lstring)
+
             
-    def writeToScreen(self, screenString, selectedImage,startX, startY):
-         cv2.putText(selectedImage,screenString,)(startX,startY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+#    def writeToScreen(self, screenString, selectedImage,startX, startY):
+#         cv2.putText(selectedImage,screenString,)(startX,startY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
           
         
     
