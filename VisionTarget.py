@@ -79,37 +79,17 @@ class VisionTarget:
            x=math.atan2(-R[1][2],R[1][1])
            y=math.atan2(-R[2][0],sy)
            z=0
-       return y    
-        
+       
+       #if the x axis is negative, then it has found the "flipped" position.
+       #mirror it to the other side.
+       
+       #A positive yaw means it should require a counterclockwise rotation to align
+       
+    
+       return z,x,y    #Yes, that's the right order.  Roll, pitch, yaw
 
-    def processNoUSB(self, inframe):
-        # Get the next camera image (may block until it is captured) and here convert it to OpenCV BGR. If you need a
-        # grayscale image, just use getCvGRAY() instead of getCvBGR(). Also supported are getCvRGB() and getCvRGBA():
-        inimg = inframe.getCvBGR()
-        
-        imagefilename="practice"+str(self.imagecount)+".png"
-        self.imagecount=self.imagecount+1
-        
-        cv2.imwrite(imagefilename, inimg)            
-    # ###################################################################################################
-    ## Process function with USB output
-    def process(self, inframe, outframe):
+    def substance(self,inimg):
 
-        
-        imagefilename="practice"+str(self.currentimagecount)+".png"
-        
-      #  inimg = cv2.imread(imagefilename+)
-      #  inimg=cv2.imread("practice7354.png")      
-        
-        inimg=inframe.getCvBGR()
-        self.currentimagecount+=1
-        cv2.imwrite(imagefilename,inimg)
-        inimg=cv2.transpose(inimg)
-        inimg=cv2.flip(inimg, 1)
-
-        
-
-        
         lowColor=np.array([53,20,211])
         highColor=np.array([86,255,255])
         imghls = cv2.cvtColor(inimg, cv2.COLOR_BGR2HLS)
@@ -311,7 +291,16 @@ class VisionTarget:
            ZYX,jac=cv2.Rodrigues(rvec)
 
            yaw=0
-           yaw=self.rotationMatrixToEulerAngles(ZYX)
+           roll,pitch,yaw=self.rotationMatrixToEulerAngles(ZYX)
+           
+           if (pitch>np.pi/2):
+              pitch=pitch-np.pi
+              yaw=-yaw
+              roll=-roll
+           elif (pitch<-np.pi/2):
+              pitch=pitch+np.pi
+              yaw=-yaw
+              roll=-roll
 #Now we have a 3x3 rotation matrix, and a translation vector. Form the 4x4 transformation matrix using homogeneous coordinates.
 #There are probably numpy functions for array/matrix manipulations that would make this easier, but I don?t know them and this works.
            totaltransformmatrix=np.array([[ZYX[0,0],ZYX[0,1],ZYX[0,2],tvec[0]],[ZYX[1,0],ZYX[1,1],ZYX[1,2],tvec[1]],[ZYX[2,0],ZYX[2,1],ZYX[2,2],tvec[2]],[0,0,0,1]])
@@ -320,17 +309,50 @@ class VisionTarget:
 
           # inverserotmax=np.linalg.inv(totaltransformmatrix)
           # cv2.putText(backtorgb, "%.2f" % inverserotmax[0,3]+" "+"%.2f" % inverserotmax[1,3]+" "+"%.2f" % inverserotmax[2,3],(3, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
-           cv2.putText(backtorgb, "%.2f" % yaw,(3, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+           yawdegrees=yaw*180/np.pi
+           cv2.putText(backtorgb, "%.2f" % yawdegrees,(3, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
         
            processedFileName="output"+str(self.currentimagecount-1)+".png"
     #       cv2.imwrite(processedFileName,backtorgb)        
            cv2.imwrite("output7354.png",backtorgb)
+           jevois.sendSerial("targets "+str(tvec[0])+" "+str(tvec[2])+" "+str(yaw))
+           return backtorgb
         
  
  
  
- 
-       # cv2.putText(outimg, fps, (3, height - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+        
+
+    def processNoUSB(self, inframe):
+        # Get the next camera image (may block until it is captured) and here convert it to OpenCV BGR. If you need a
+        # grayscale image, just use getCvGRAY() instead of getCvBGR(). Also supported are getCvRGB() and getCvRGBA():
+        inimg = inframe.getCvBGR()
+        
+        imagefilename="practice"+str(self.imagecount)+".png"
+        self.imagecount=self.imagecount+1
+        
+        cv2.imwrite(imagefilename, inimg)
+        inimg=cv2.transpose(inimg)
+        inimg=cv2.flip(inimg, 1)
+        self.substance(inimg)
+    # ###################################################################################################
+    ## Process function with USB output
+    def process(self, inframe, outframe):
+
+        
+        imagefilename="practice"+str(self.currentimagecount)+".png"
+        
+      #  inimg = cv2.imread(imagefilename+)
+      #  inimg=cv2.imread("practice7354.png")      
+        
+        inimg=inframe.getCvBGR()
+        self.currentimagecount+=1
+        cv2.imwrite(imagefilename,inimg)
+        inimg=cv2.transpose(inimg)
+        inimg=cv2.flip(inimg, 1)
+
+        
+        backtorgb=self.substance(inimg)
         
         # Convert our output image to video output format and send to host over USB:
         outframe.sendCv(backtorgb)

@@ -29,6 +29,7 @@ class SerialTest:
         # a simple frame counter used to demonstrate sendSerial():
         self.frame = 0
         self.countup=0.0
+        self.datafile=open("serialrecord.txt","w+")
         
     # ###################################################################################################
     ## Process function with no USB output
@@ -48,6 +49,7 @@ class SerialTest:
 
         self.countup=self.countup+0.1
         jevois.sendSerial("Target 10 10 10")
+        self.datafile.write("Target data written\r\n")
 
         # Get frames/s info from our timer:
         fps = self.timer.stop()
@@ -67,8 +69,8 @@ class SerialTest:
         # cv2.putText(outimg, str(len(squares)), (3, height - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
         
       
-
-      
+        jevois.sendSerial("With  usb\r\n")
+        self.datafile.write("wrote within processNoUsb\r\n")
         self.frame += 1
         
     # ###################################################################################################

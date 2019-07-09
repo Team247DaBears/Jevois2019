@@ -52,7 +52,7 @@ class Cargo:
          # Get the next camera image (may block until it is captured) and here convert it to OpenCV BGR. If you need a
         # grayscale image, just use getCvGRAY() instead of getCvBGR(). Also supported are getCvRGB() and getCvRGBA():
         inimg = inframe.getCvBGR()
-        if (self.imagecount%20==0):
+        if (self.imagecount==0):
             self.datafile.close() #Close it periodically to save contents
             self.datafile=open(self.datafilename,"a")
         imagefilename="saveimage"+str(self.imagecount)+".png"
