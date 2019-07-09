@@ -2,6 +2,7 @@ import libjevois as jevois
 import cv2
 import numpy as np
 import random
+import math
 
 ## Detect Vision Targets
 #
@@ -59,7 +60,26 @@ class VisionTarget:
     def logstringonce(self,lstring):
         if (self.written==False):
             self.datafile.write(lstring)    
-        
+    
+    def rotationMatrixToEulerAngles(self,R):   #r is the output of Rodrigues, when the input is rvec
+       sy=np.sqrt(R[0][0]*R[0][0]+R[1][0]*R[1][0])
+       singular=False
+       if (sy<0.000001):
+           singular=True
+       x=0
+       y=0
+       z=0
+
+       #xyz is roll, yaw, pitch
+       if (singular==False):
+           x=math.atan2(R[2][1],R[2][2])
+           y=math.atan2(-R[2][0],sy)
+           z=math.atan2(R[1][0],R[0][0])
+       else:
+           x=math.atan2(-R[1][2],R[1][1])
+           y=math.atan2(-R[2][0],sy)
+           z=0
+       return y    
         
 
     def processNoUSB(self, inframe):
@@ -290,7 +310,8 @@ class VisionTarget:
 
            ZYX,jac=cv2.Rodrigues(rvec)
 
-           roll,yaw,pitch=rotationMatrixToEulerAngles(ZYX)
+           yaw=0
+           yaw=self.rotationMatrixToEulerAngles(ZYX)
 #Now we have a 3x3 rotation matrix, and a translation vector. Form the 4x4 transformation matrix using homogeneous coordinates.
 #There are probably numpy functions for array/matrix manipulations that would make this easier, but I don?t know them and this works.
            totaltransformmatrix=np.array([[ZYX[0,0],ZYX[0,1],ZYX[0,2],tvec[0]],[ZYX[1,0],ZYX[1,1],ZYX[1,2],tvec[1]],[ZYX[2,0],ZYX[2,1],ZYX[2,2],tvec[2]],[0,0,0,1]])
@@ -320,25 +341,7 @@ class VisionTarget:
 #    def writeToScreen(self, screenString, selectedImage,startX, startY):
 #         cv2.putText(selectedImage,screenString,)(startX,startY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
           
-    def rotationMatrixToEulerAngles(R):   #r is the output of Rodrigues, when the input is rvec
-       sy=np.sqrt(R[0][0]*R[0][0]+R[1][0]*R[1][0])
-       singular=False
-       if (sy<0.000001):
-           singular=True
-       x=0
-       y=0
-       z=0
-
-       #xyz is roll, yaw, pitch
-       if (singular==False):
-           x=np.atan2(R[2][1],R[2][2])
-           y=np.atan2(-R[2][0],sy)
-           z=np.atan2(R[1][0],R[0][0])
-       else:
-           x=np.atan2(-R[1][2],R[1][1])
-           y=np.atan2(-R[2][0],sy)
-           z=0
-       return x,y,z
+    
     
         
         
