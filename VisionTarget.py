@@ -285,44 +285,25 @@ class VisionTarget:
            #spit things out on the serial port, but first, do some testing.  Print stuff out.                   
 
 
-
+       
            #change coordinate systems
 
            ZYX,jac=cv2.Rodrigues(rvec)
 
-           #ZYX is the transformation matrix from the camera to world coordinates.  Use it to find yaw
-
-           sy=np.sqrt(ZYX[0][0]*ZYX[0][0]+ZYX[1][0]*ZYX[1][0])
-           
-           yaw=np.atan2(ZYZ[2][0],sy)
-           roll=0
-           if (sy<0.000001):
-               roll=np.atan2(ZYX[1][2],ZYX[1][1])
-           else:
-               roll=np.atan2(ZYX[2][1],ZYX[2][2])
-           
-           #if axes were flipped, invert the y axis
-           if (roll<-np.pi/2 OR roll>np.pi/2):
-               yaw=-1*yaw
-
-
-           serialstring="Target "+ str(tvec[0])+" "+str(tvec[2])+" "+str(yaw)+"\n"
-           jevois.sendSerial(serialstring)
-
-
+           roll,yaw,pitch=rotationMatrixToEulerAngles(ZYX)
 #Now we have a 3x3 rotation matrix, and a translation vector. Form the 4x4 transformation matrix using homogeneous coordinates.
 #There are probably numpy functions for array/matrix manipulations that would make this easier, but I don?t know them and this works.
-   #        totaltransformmatrix=np.array([[ZYX[0,0],ZYX[0,1],ZYX[0,2],tvec[0]],[ZYX[1,0],ZYX[1,1],ZYX[1,2],tvec[1]],[ZYX[2,0],ZYX[2,1],ZYX[2,2],tvec[2]],[0,0,0,1]])
+           totaltransformmatrix=np.array([[ZYX[0,0],ZYX[0,1],ZYX[0,2],tvec[0]],[ZYX[1,0],ZYX[1,1],ZYX[1,2],tvec[1]],[ZYX[2,0],ZYX[2,1],ZYX[2,2],tvec[2]],[0,0,0,1]])
 #The resulting array is the transformation matrix from world coordinates (centered on the target) to camera coordinates. (Centered on the camera) We need camera to world. That is just the inverse of that matrix.
-   #        WtoC=np.mat(totaltransformmatrix)
+           WtoC=np.mat(totaltransformmatrix)
 
           # inverserotmax=np.linalg.inv(totaltransformmatrix)
           # cv2.putText(backtorgb, "%.2f" % inverserotmax[0,3]+" "+"%.2f" % inverserotmax[1,3]+" "+"%.2f" % inverserotmax[2,3],(3, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
-   #        cv2.putText(backtorgb, "%.2f" % Yaw,(3, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+           cv2.putText(backtorgb, "%.2f" % yaw,(3, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
         
-    #       processedFileName="output"+str(self.currentimagecount-1)+".png"
+           processedFileName="output"+str(self.currentimagecount-1)+".png"
     #       cv2.imwrite(processedFileName,backtorgb)        
-    #       cv2.imwrite("output7354.png",backtorgb)
+           cv2.imwrite("output7354.png",backtorgb)
         
  
  
@@ -331,19 +312,33 @@ class VisionTarget:
        # cv2.putText(outimg, fps, (3, height - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
         
         # Convert our output image to video output format and send to host over USB:
-        else:  #going way back to if secondindex<-1
-           jevois.sendSerial("Targets not found\n")
         outframe.sendCv(backtorgb)
         self.written=True
-
-        
         
 
             
 #    def writeToScreen(self, screenString, selectedImage,startX, startY):
 #         cv2.putText(selectedImage,screenString,)(startX,startY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
           
-        
+    def rotationMatrixToEulerAngles(R):   #r is the output of Rodrigues, when the input is rvec
+       sy=np.sqrt(R[0][0]*R[0][0]+R[1][0]*R[1][0])
+       singular=False
+       if (sy<0.000001):
+           singular=True
+       x=0
+       y=0
+       z=0
+
+       #xyz is roll, yaw, pitch
+       if (singular==False):
+           x=np.atan2(R[2][1],R[2][2])
+           y=np.atan2(-R[2][0],sy)
+           z=np.atan2(R[1][0],R[0][0])
+       else:
+           x=np.atan2(-R[1][2],R[1][1])
+           y=np.atan2(-R[2][0],sy)
+           z=0
+       return x,y,z
     
         
         
