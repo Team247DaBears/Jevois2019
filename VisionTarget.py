@@ -314,9 +314,12 @@ class VisionTarget:
         
            processedFileName="output"+str(self.currentimagecount-1)+".png"
     #       cv2.imwrite(processedFileName,backtorgb)        
-           cv2.imwrite("output7354.png",backtorgb)
-           jevois.sendSerial("targets "+str(tvec[0])+" "+str(tvec[2])+" "+str(yaw))
+    #       cv2.imwrite("output7354.png",backtorgb)
+           jevois.sendSerial("targets "+str(tvec[0][0])+" "+str(tvec[2][0])+" "+str(yaw))
            return backtorgb
+        else:
+            return inimg
+        
         
  
  
@@ -328,13 +331,17 @@ class VisionTarget:
         # grayscale image, just use getCvGRAY() instead of getCvBGR(). Also supported are getCvRGB() and getCvRGBA():
         inimg = inframe.getCvBGR()
         
-        imagefilename="practice"+str(self.imagecount)+".png"
-        self.imagecount=self.imagecount+1
-        
-        cv2.imwrite(imagefilename, inimg)
+
+
         inimg=cv2.transpose(inimg)
         inimg=cv2.flip(inimg, 1)
-        self.substance(inimg)
+        imagefilename="saveimage"+str(self.currentimagecount)+".png"
+        cv2.imwrite(imagefilename, inimg)
+        outimg=self.substance(inimg)
+        outfilename="output"+str(self.currentimagecount)+".png"
+        cv2.imwrite(outfilename,outimg)
+        self.currentimagecount=self.currentimagecount+1
+        
     # ###################################################################################################
     ## Process function with USB output
     def process(self, inframe, outframe):
@@ -347,7 +354,7 @@ class VisionTarget:
         
         inimg=inframe.getCvBGR()
         self.currentimagecount+=1
-        cv2.imwrite(imagefilename,inimg)
+    #    cv2.imwrite(imagefilename,inimg)
         inimg=cv2.transpose(inimg)
         inimg=cv2.flip(inimg, 1)
 
