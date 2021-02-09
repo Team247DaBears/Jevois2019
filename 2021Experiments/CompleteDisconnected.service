@@ -1,0 +1,10 @@
+[unit]
+Description = Service to take some pictures
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python3 /home/pi/Jevois2019/2021Experiments/CompleteDisconnected.py
+
+[Install]
+WantedBy=multi-user.target
